@@ -4,7 +4,9 @@
 namespace raytracer
 {
     class Ray
-    {};
+    {
+        
+    };
 }
 
 #endif // __POLYGON_RAY
