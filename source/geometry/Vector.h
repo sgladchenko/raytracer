@@ -6,47 +6,73 @@
 
 namespace raytracer
 {
-    class Vector : public raytracer::VectorData
+    class Vector
     {
     // 3D Vector given by its components in a cartesian frame
-        using base = raytracer::VectorData;
     public:
-        Vector() : base{} {}
+        Vector(); // no inits of doubles and cache
         Vector(double _vx, double _vy, double _vz);
+        Vector(const raytracer::UnitVector& _unitVector);
+        Vector(const raytracer::UnitVector& _unitVector, double _norm);
         Vector(const raytracer::Point& from, const raytracer::Point& to);
 
-        virtual raytracer::Vector operator+(const raytracer::Vector& rhs) const;
-        virtual raytracer::Vector operator-(const raytracer::Vector& rhs) const;
-        virtual raytracer::Vector operator*(double rhs) const;
-        virtual raytracer::Vector operator/(double rhs) const;
+        // Get methods
+        double get_x() const noexcept;
+        double get_y() const noexcept;
+        double get_z() const noexcept;
+
+        // Set methods
+        void set_x(double val) noexcept;
+        void set_y(double val) noexcept;
+        void set_z(double val) noexcept;
+
+        // Dependent properties
+        double get_norm() const noexcept;
+        const raytracer::UnitVector& get_unitVector() const;
+
+        // Basic linear operations
+        raytracer::Vector operator+(const raytracer::Vector& rhs) const noexcept;
+        raytracer::Vector operator-(const raytracer::Vector& rhs) const noexcept;
+        raytracer::Vector operator*(double rhs) const noexcept;
+        raytracer::Vector operator/(double rhs) const noexcept;
+
+        // More complicated linear operations
+
+        // Some useful constants
+        static const raytracer::Vector zero;
+        static const raytracer::Vector e_x;
+        static const raytracer::Vector e_y;
+        static const raytracer::Vector e_z;
+    
+    protected:
+        RT_3DARRAY(double,coordinates);
+        mutable raytracer::Cached<double> norm;
+        mutable raytracer::Cached<raytracer::UnitVector> unitVector;
+    
+        void update_norm() const noexcept;
+        void update_unitVector() const;
     };
 
-    class VectorData
+    class UnitVector
     {
-    // Data object storing Vector data
+    // 3D Vector of the unit length, given by its components in a cartesian frame
     public:
-        VectorData() { components[0] = 0; components[1] = 0; components[2] = 0; }
-        VectorData(double _vx, double _vy, double _vz)
-        {
-            components[0] = _vx;
-            components[1] = _vy;
-            components[2] = _vz;
-        }
+        UnitVector(); // no inits of doubles
+        UnitVector(double _vx, double _vy, double _vz); // It will re-scale them to unit
 
-        // Get methods
-        double get_x() const { return components[0]; }
-        double get_y() const { return components[1]; }
-        double get_z() const { return components[2]; }
-        // Set methods
-        void set_x(double val) { components[0] = val; }
-        void set_y(double val) { components[1] = val; }
-        void set_z(double val) { components[2] = val; }
-        // Get the actual pointer to the array
-        double* get_array() { return components; }
+        // Basic linear operations
+        raytracer::Vector operator+(const raytracer::Vector& rhs) const noexcept;
+        raytracer::Vector operator-(const raytracer::Vector& rhs) const noexcept;
+        raytracer::Vector operator*(double rhs) const noexcept;
+        raytracer::Vector operator/(double rhs) const noexcept;
 
-    private:
-        double components[3];
-        raytracer::Cached<double> norm;
+        // Some useful constants
+        static const raytracer::UnitVector e_x;
+        static const raytracer::UnitVector e_y;
+        static const raytracer::UnitVector e_z;
+
+    protected:
+        RT_3DARRAY(double,coordinates);
     };
 }
 

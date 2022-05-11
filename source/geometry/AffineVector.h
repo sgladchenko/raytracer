@@ -16,7 +16,7 @@ namespace raytracer
         AffineVector(const raytracer::Point& from, const raytracer::Point& to);
     
     private:
-        raytracer::Point basePoint;  // TODO: Make some sort of implementation object with the data and cache statuses
+        raytracer::Point basePoint;
     };
 }
 
