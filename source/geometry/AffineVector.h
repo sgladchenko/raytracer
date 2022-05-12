@@ -6,17 +6,15 @@
 
 namespace raytracer
 {
-    class AffineVector : public raytracer::Vector
+    struct AffineVector : public raytracer::Vector
     {
-    public:
+    // 3D Vector based on a point abstaction class
+        raytracer::Point point;
         AffineVector();
         AffineVector(const raytracer::Point& point, const raytracer::Vector& vec);
         AffineVector(const raytracer::Vector& vec);
         AffineVector(const raytracer::Point& point);
         AffineVector(const raytracer::Point& from, const raytracer::Point& to);
-    
-    private:
-        raytracer::Point basePoint;
     };
 }
 

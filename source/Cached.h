@@ -15,7 +15,6 @@ namespace raytracer
         Cached(T&& obj) : content{std::move(obj)} {}
         T content;
         bool actual = true;
-        void request_update() { actual = false; }
     };
 }
 
