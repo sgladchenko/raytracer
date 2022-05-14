@@ -10,11 +10,10 @@ namespace raytracer
     {
     // 3D Vector based on a point abstaction class
         raytracer::Point point;
-        AffineVector();
-        AffineVector(const raytracer::Point& point, const raytracer::Vector& vec);
-        AffineVector(const raytracer::Vector& vec);
-        AffineVector(const raytracer::Point& point);
-        AffineVector(const raytracer::Point& from, const raytracer::Point& to);
+        AffineVector(const raytracer::Point& point, const raytracer::Vector& vec) noexcept;
+        AffineVector(const raytracer::Vector& vec) noexcept;
+        AffineVector(const raytracer::Point& point) noexcept;
+        AffineVector(const raytracer::Point& from, const raytracer::Point& to) noexcept;
     };
 }
 

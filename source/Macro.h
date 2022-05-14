@@ -4,28 +4,16 @@
 #define NOSIMD 0
 #define AVX2   1
 
-///////////////////////////////////////////////////////////////////////////////
-// Here: just the configuration of the library
-// 1. Allow/disallow SIMD instructions and specifiy what type of instructions
-//    we want to use.
-      #define RT_SIMD AVX2
-// 2. Allow using uninialized reads in some special circumstances to avoid 
-//    additional checks, make as much noexcept as possible,
-//    i.e. improve performance.
-      //#define RT_UREADS
-///////////////////////////////////////////////////////////////////////////////
+// Allow using uninialized reads in some special circumstances to avoid 
+// additional checks, make as much noexcept as possible,
+// i.e. improve performance.
+#define RT_UREADS_UNITVECTOR
 
-#if RT_SIMD == AVX2
+#define RT_3DARRAY(T,name) T name[3]
 
-    // Registers with 256 bits, i.e. 4 doubles
-    #include "immintrin.h"
-    #define RT_3DARRAY(T,name) alignas(256) T name[4]
+#define RT_SQR(x) (x)*(x)
 
-#else
-
-    // Just don't used them; instead use normal loops
-    #define RT_3DARRAY(T,name) T name[3]
-
-#endif
+// In some really special cases explicit SIMD instructions might become needed
+#define RT_SIMD AVX2
 
 #endif // __MACRO
