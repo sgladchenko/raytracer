@@ -1,9 +1,6 @@
 #ifndef __CACHED
 #define __CACHED
 
-#include <memory>
-#include <functional>
-
 namespace raytracer
 {
     template <class T>
@@ -14,9 +11,17 @@ namespace raytracer
         Cached()
         : actual{false} {}
         Cached(const T& obj)
-        : content{obj}, actual{true} {}
-    // Data and flag which data is up-to-data
-        T content;
+        : value{obj}, actual{true} {}
+        Cached(T&& obj)
+        : value{std::move(obj)}, actual{true} {}
+
+    // The method to make the cached value up-to-date again
+        void actualize(const T& obj) { value = obj; actual = true; }
+        void actualize(T&& obj) { value = std::move(obj); actual = true; }
+        void expire() { actual = false; }
+    
+    // Data and flag which tells if value is up-to-date
+        T value;
         bool actual = true;
     };
 }

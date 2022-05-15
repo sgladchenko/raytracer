@@ -5,6 +5,8 @@
 #include "source/Macro.h"
 #include "source/Cached.h"
 
+#include <exception>
+
 namespace raytracer
 {
     class Vector;
@@ -13,6 +15,7 @@ namespace raytracer
 
 namespace raytracer
 {
+// Some other useful binary operations over vectors
     double cos(const raytracer::Vector& v1, const raytracer::Vector& v2);
     double dot(const raytracer::UnitVector& v1, const raytracer::UnitVector& v2) noexcept;
     double dot(const raytracer::Vector& v1, const raytracer::Vector& v2) noexcept;
@@ -24,24 +27,27 @@ namespace raytracer
     {
     // 3D Vector given by its components in a cartesian frame
     public:
+        Vector() {}
         Vector(double _vx, double _vy, double _vz) noexcept;
+        Vector(double* arr) noexcept;
         Vector(const raytracer::Point& from, const raytracer::Point& to) noexcept;
         Vector(const raytracer::UnitVector& _unitVector) noexcept;
         Vector(const raytracer::UnitVector& _unitVector, double _norm) noexcept;
 
         // Get methods
-        double get_x() const noexcept;
-        double get_y() const noexcept;
-        double get_z() const noexcept;
+        double get_x() const noexcept { return components[0]; }
+        double get_y() const noexcept { return components[1]; }
+        double get_z() const noexcept { return components[2]; }
 
         // Set methods
         void set_x(double val) noexcept;
         void set_y(double val) noexcept;
         void set_z(double val) noexcept;
+        void set_array(double* arr) noexcept;
 
         // Dependent properties
         double get_norm() const noexcept;
-        const raytracer::UnitVector& get_unitVector() const noexcept;
+        const raytracer::UnitVector& get_unitVector() const;
 
         // Basic linear operations
         raytracer::Vector operator+(const raytracer::Vector& rhs) const noexcept;
@@ -79,17 +85,16 @@ namespace raytracer
     {
     // 3D Vector of the unit length, given by its components in a cartesian frame
     public:
-        UnitVector(double _vx, double _vy, double _vz) noexcept; // it will re-scale them to unit
+        UnitVector() {}
+        UnitVector(double _vx, double _vy, double _vz) noexcept;
+        UnitVector(double _vx, double _vy, double _vz, double _norm) noexcept;
+        UnitVector(double* arr) noexcept;
+        UnitVector(double* arr, double _norm) noexcept;
         
         // Get methods
-        double get_x() const noexcept;
-        double get_y() const noexcept;
-        double get_z() const noexcept;
-
-        // Set methods
-        void set_x(double val) noexcept;
-        void set_y(double val) noexcept;
-        void set_z(double val) noexcept;
+        double get_x() const noexcept { return components[0]; }
+        double get_y() const noexcept { return components[1]; }
+        double get_z() const noexcept { return components[2]; }
 
         // Basic linear operations
         raytracer::Vector operator+(const raytracer::Vector& rhs) const noexcept;
@@ -104,12 +109,11 @@ namespace raytracer
 
         // Make it friend, so we'll be able to use vector intrinsics if needed
         friend double raytracer::dot(const raytracer::UnitVector& v1, const raytracer::UnitVector& v2) noexcept;
+        friend class Vector;
 
     protected:
-        RT_3DARRAY(double,coordinates);
+        RT_3DARRAY(double,components);
     };
-
-    // Some other useful binary operations over vectors
 }
 
 #endif // __GEOMETRY_VECTOR

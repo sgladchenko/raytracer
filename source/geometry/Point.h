@@ -9,17 +9,18 @@ namespace raytracer
     {
     // Point given by its cartesian coordinates
     public:
+        Point() {}
         Point(double _x, double _y, double _z) noexcept;
 
         // Get methods
-        inline double get_x() const noexcept;
-        inline double get_y() const noexcept;
-        inline double get_z() const noexcept;
+        double get_x() const noexcept { return coordinates[0]; }
+        double get_y() const noexcept { return coordinates[1]; }
+        double get_z() const noexcept { return coordinates[2]; }
 
         // Set methods
-        inline void set_x(double val) noexcept;
-        inline void set_y(double val) noexcept;
-        inline void set_z(double val) noexcept;
+        void set_x(double val) noexcept { coordinates[0] = val; }
+        void set_y(double val) noexcept { coordinates[1] = val; }
+        void set_z(double val) noexcept { coordinates[2] = val; }
 
         double distance(const raytracer::Point& point) const noexcept;
         static double distance(const raytracer::Point& p1, const raytracer::Point& p2) noexcept;

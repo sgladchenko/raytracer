@@ -9,7 +9,8 @@
 // i.e. improve performance.
 #define RT_UREADS_UNITVECTOR
 
-#define RT_3DARRAY(T,name) T name[3]
+#define RT_3DARRAY_SIZE 3
+#define RT_3DARRAY(T,name) T name[RT_3DARRAY_SIZE]
 
 #define RT_SQR(x) (x)*(x)
 

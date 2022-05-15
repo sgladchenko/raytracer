@@ -3,33 +3,11 @@
 
 #include <cmath>
 
+const raytracer::Point raytracer::Point::origin {0.0, 0.0, 0.0};
+
 raytracer::Point::Point(double _x, double _y, double _z) noexcept
 : coordinates {_x,_y,_z}
 {}
-
-inline double raytracer::Point::get_x()
-const noexcept
-{ return coordinates[0]; }
-
-inline double raytracer::Point::get_y()
-const noexcept
-{ return coordinates[1]; }
-
-inline double raytracer::Point::get_z()
-const noexcept
-{ return coordinates[2]; }
-
-inline void raytracer::Point::set_x(double val)
-noexcept
-{ coordinates[0] = val; }
-
-inline void raytracer::Point::set_y(double val)
-noexcept
-{ coordinates[1] = val; }
-
-inline void raytracer::Point::set_z(double val)
-noexcept
-{ coordinates[2] = val; }
 
 double raytracer::Point::distance(const raytracer::Point& p1, const raytracer::Point& p2)
 noexcept
@@ -42,5 +20,5 @@ noexcept
 double raytracer::Point::distance(const raytracer::Point& point)
 const noexcept
 {
-    return raytracer::Point::distance(*this, point);
+    return distance(*this, point);
 }
