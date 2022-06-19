@@ -3,8 +3,8 @@
 .PHONY:
 test: build/test
 
-build/raytracercore.so: raytracercore/raytracercore.h
-	$(CC) -shared -o build/raytracercore.so cache.c intersect.c normalize.c
+build/rtcore.so: rtcore/rtcore.h
+	$(CC) -shared -o build/rtcore.so cache.c intersect.c normalize.c
 
-build/test: test/test.c raytracercore/raytracercore.h
-	$(CC) -o "build/test" "test/test.c" -I"raytracercore/"
+build/test: test/test.c rtcore/rtcore_internal.h
+	$(CC) -o "build/test" "test/test.c" -I "rtcore/"
