@@ -1,4 +1,4 @@
-#include "rtcore_internal.h"
+#include "internal.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -8,8 +8,8 @@ int main()
 
     // Check if floats are allocated next to each other physically & check their alignment
 
-    rtVector3D *pVecs = (rtVector3D *)aligned_alloc(sizeof(float)*4, sizeof(rtVector3D)*5);
-    printf("sizeof(struct rtVector) = %lu\n", sizeof(rtVector3D));
+    struct rtVector3D *pVecs = (struct rtVector3D *)aligned_alloc(sizeof(float)*4, sizeof(struct rtVector3D)*5);
+    printf("sizeof(struct rtVector) = %lu\n", sizeof(struct rtVector3D));
 
     for (int i=0; i<5; ++i)
     {
@@ -21,11 +21,11 @@ int main()
 
     // Check if it's possible to use memcpy for copying structures
 
-    rtVector3D s1 = {.x=1.0, .y=2.0, .z=3.0};
-    rtVector3D *ps2;
+    struct rtVector3D s1 = {.x=1.0, .y=2.0, .z=3.0};
+    struct rtVector3D *ps2;
 
-    ps2 = (rtVector3D *)aligned_alloc(sizeof(float)*4, sizeof(rtVector3D));
-    memcpy(ps2, &s1, sizeof(rtVector3D));
+    ps2 = (struct rtVector3D *)aligned_alloc(sizeof(float)*4, sizeof(struct rtVector3D));
+    memcpy(ps2, &s1, sizeof(struct rtVector3D));
 
     printf("ps2->x: %f\n", ps2->x);
     printf("ps2->y: %f\n", ps2->y);
