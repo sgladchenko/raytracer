@@ -1,22 +1,36 @@
-#pragma once
+#ifndef __RENDER
+#define __RENDER
 
 #include <string>
 #include <vector>
 
-extern "C"
+#include "rtcore.h"
+
+namespace rt
 {
-    #include "rtcore.h"
+    // Forward declarations of all the classes in this hpp
+    class RGB;
+    class Pixmap;
+    class Render;
 }
 
 namespace rt
 {
     /* Very simple class that wraps things around colors and operations with them */
-    class RGB
+    struct RGB
     {
-    public:
-        RGB() : r {0}, g {0}, b {0} {} // black, by default
-        RGB(int _r, int _g, int _b) : r {_r}, g {_g}, b {_b} {}
-        RGB(const std::string& str); // Take a color saved in a string as "#......"
+        typedef int color_t;
+        // Default color is black
+        RGB()
+            : red {0}, green {0}, blue {0}
+        {}
+
+        RGB(color_t r, color_t g, color_t b)
+            : red {r}, green {g}, blue {b}
+        {}
+
+        // Take a color saved in a string as "#......"
+        RGB(const std::string& str);
 
         // Some algebraic operations to be used to mimic how light
         // scatters on the surface of a face
@@ -24,13 +38,16 @@ namespace rt
         rt::RGB operator*(const rt::RGB& color);
         rt::RGB operator*(float factor);
 
-    private:
-        int r, g, b;
+        color_t red, green, blue;
     };
 
     /* Wrapper around buffer of colored pixels */
     class Pixmap
     {
+        // May be helpful as in multithreaded version the buffer will need to be
+        // split into chunks evaluated by different threads.
+        friend rt::Render;
+
     public:
         Pixmap(int _Nx, int _Ny) :
             Nx {_Nx}, Ny {_Ny}, buffer(_Nx*_Ny)
@@ -40,14 +57,19 @@ namespace rt
         enum class format { png };
         void saveFile(std::string fname, rt::Pixmap::format fmt) const;
 
-        // Set a pixel
-        void setPixel(const rt::RGB& color);
+        rt::RGB& operator()(int i, int j) { return buffer[i*Nx + j]; }
+        rt::RGB& pixel(int i, int j) { return buffer[i*Nx + j]; }
+
+        const rt::RGB& operator()(int i, int j) const { return buffer[i*Nx + j]; }
+        const rt::RGB& pixel(int i, int j) const { return buffer[i*Nx + j]; }
 
     private:
         // Dimensions of the frame
         int Nx, Ny;
         // Vector that contains the buffer
         std::vector<rt::RGB> buffer;
+
+        void savepng(std::string fname) const;
     };
 
     /* Main object of the engine used to load mesh & faces and render a picture */
@@ -63,12 +85,12 @@ namespace rt
                      float aperture);
 
         // Returns a pixmap of the rendered picture
-        const rt::Pixmap& render();
+        const rt::Pixmap& pixmap();
 
     private:
         // Dimensions of the frame
         int Nx, Ny;
-        // Cache the pixmap rendered
+        // Cache the rendered pixmap
         rt::Pixmap cache;
 
         // Hidden C-language structures that are used in rtcore.h
@@ -78,9 +100,11 @@ namespace rt
 
         // Function that makes a structure of rtView, taking the
         // coordinates in pixels within a frame
-        rtView calc_rtView(int i, int j);
+        rtView makeView(int i, int j);
 
         // Update the cached pixmap if needed
-        void do_render();
+        void doRender();
     };
 }
+
+#endif // __RENDER

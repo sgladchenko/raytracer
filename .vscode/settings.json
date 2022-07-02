@@ -1,10 +1,11 @@
 {
-    "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.includePath": [
-        "./render",
         "./rtcore",
+        "./render",
         "./lib/libpng/include",
-        "./lib/libpng/include/libpng16",
         "./lib"
-    ]
+    ],
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }

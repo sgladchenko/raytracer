@@ -1,6 +1,10 @@
 #ifndef __RTCORE
 #define __RTCORE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ///////////////////////////////////////////
 /* Core structures needed for raytracing */
 ///////////////////////////////////////////
@@ -75,5 +79,9 @@ int rtIsExposed(struct rtFaces *faces,
                 struct rtVector3D *lightpoint,
                 int iface, struct rtVector3D *intersection,
                 float* cosine);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __RTCORE

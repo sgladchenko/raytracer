@@ -5,7 +5,7 @@
 
 int main()
 {
-
+    
     // Check if floats are allocated next to each other physically & check their alignment
 
     struct rtVector3D *pVecs = (struct rtVector3D *)aligned_alloc(sizeof(float)*4, sizeof(struct rtVector3D)*5);

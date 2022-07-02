@@ -122,7 +122,10 @@ int rtIntersect(struct rtFaces *faces, struct rtView *view, struct rtVector3D *i
 
 /* Similar function to the one above, but it finds if there's an obstacle between
    intersection point and the light source; if there is, it will make a shadow,
-   and the light source won't contribute to the final color. */
+   and the light source won't contribute to the final color. Returns 0 if the point
+   isn't exposed by the light of the light source, returns 1 otherwise. Also in 
+   cosine returns cosine of the angle between the normal and the line connecting
+   intersection and lightpoint (needed in the color evaluation). */
 int rtIsExposed(struct rtFaces *faces,
                 struct rtView *view,
                 struct rtVector3D *lightpoint,
@@ -194,7 +197,7 @@ int rtIsExposed(struct rtFaces *faces,
                              .y = ray.y * invnorm,
                              .z = ray.z * invnorm};
 
-   *cosine = RT_DOT(uray,faces->un[iface]);
+   *cosine = fabsf(RT_DOT(uray,faces->un[iface]));
    return 1;
 #endif
 }

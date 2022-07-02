@@ -22,17 +22,17 @@ typedef struct
     size_t height;
 }
 bitmap_t;
-    
+      
 /* Given "bitmap", this returns the pixel of bitmap at the point 
    ("x", "y"). */
 
 static pixel_t * pixel_at (bitmap_t * bitmap, int x, int y)
 {
     return bitmap->pixels + bitmap->width * y + x;
-}
+} 
     
 /* Write "bitmap" to a PNG file specified by "path"; returns 0 on
-   success, non-zero on error. */
+   success, non-zero on error. */   
 
 static int save_png_to_file (bitmap_t *bitmap, const char *path)
 {
