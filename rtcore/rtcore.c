@@ -3,13 +3,45 @@
 #include <string.h>
 #include <math.h>
 
+/* Allocate buffer of #N rtVector3D structs on heap; returns a pointer to it.
+   When using SIMD, makes necessary alignment. */
+struct rtVector3D *rtMakeVector3DArray(int N)
+{
+#ifndef RT_SIMD
+    // When we don't use SIMD, no need in special alignment; normal malloc
+    return (struct rtVector3D *)malloc(sizeof(struct rtVector3D)*N);
+#else
+    // When using SIMD, all the float buffers need to be aligned, so they can
+    // be loaded to vector registers. (RT_VNUM is the size of registers used)
+    return (struct rtVector3D *)aligned_alloc(sizeof(float)*RT_VNUM, sizeof(struct rtVector3D)*N);
+#endif
+}
+
+/* Allocates a new rtMesh instance and the memory needed to store all 
+  its contents */
+struct rtMesh  *rtMakeMesh(int Npoints, int Nfaces)
+{
+    struct rtMesh *mesh = (struct rtMesh *)malloc(sizeof(struct rtMesh));
+    mesh->Npoints = Npoints;
+    mesh->Nfaces  = Nfaces;
+
+    // Here: no need in alignment, as this buffer isn't going to be used
+    // in the actual raytracing
+    mesh->points = (struct rtVector3D *)malloc(sizeof(struct rtVector3D) * Npoints);
+    mesh->p0 = (int *)malloc(sizeof(int) * Npoints);
+    mesh->p1 = (int *)malloc(sizeof(int) * Npoints);
+    mesh->p2 = (int *)malloc(sizeof(int) * Npoints);
+
+    return mesh;
+}
+
 /* Assembles rtFaces structure on heap using info provided in rtMeshes;
    For the actual faces evaluates their edges, normals etc */
 struct rtFaces *rtMakeFaces(struct rtMesh *mesh)
 {
     // Allocate it on heap, so it'll be easier to pass it to the other functions
     struct rtFaces *faces = (struct rtFaces *)malloc(sizeof(struct rtFaces));
-    faces->N = mesh->NFaces;
+    faces->N = mesh->Nfaces;
 
     // Allocate memory needed for contents of rtFaces
     faces->p  = rtMakeVector3DArray(faces->N);
@@ -22,7 +54,7 @@ struct rtFaces *rtMakeFaces(struct rtMesh *mesh)
     memcpy(faces->p, mesh->p0, sizeof(struct rtVector3D)*faces->N);
 
     // Side edges of faces; e1 = p1 - p0 and e2 = p2 - p0
-    for (int i = 0; i < mesh->NFaces; ++i)
+    for (int i = 0; i < mesh->Nfaces; ++i)
     {
         faces->e1[i].x = mesh->points[mesh->p1[i]].x - mesh->points[mesh->p0[i]].x;
         faces->e1[i].y = mesh->points[mesh->p1[i]].y - mesh->points[mesh->p0[i]].y;
@@ -34,7 +66,7 @@ struct rtFaces *rtMakeFaces(struct rtMesh *mesh)
     }
 
     // Normals; just cross products [e1, e2]
-    for (int i = 0; i < mesh->NFaces; ++i)
+    for (int i = 0; i < mesh->Nfaces; ++i)
     {
         faces->n[i].x = faces->e1[i].y*faces->e2[i].z - faces->e1[i].z*faces->e2[i].y;
         faces->n[i].y = faces->e1[i].z*faces->e2[i].x - faces->e1[i].x*faces->e2[i].z;
@@ -50,12 +82,37 @@ struct rtFaces *rtMakeFaces(struct rtMesh *mesh)
     return faces;
 }
 
+/* Allocate rtLights and its contents on heap */
+struct rtLights *rtMakeLights(int Nlights)
+{
+    struct rtLights *lights = (struct rtLights *)malloc(sizeof(struct rtLights));
+    lights->N = Nlights;
+    lights->p = (struct rtVector3D *)malloc(sizeof(struct rtVector3D)*Nlights);
+
+    return lights;
+}
+
+/* Free all the contents of rtMesh and the object itself */ 
+void rtFreeMesh(struct rtMesh *mesh)
+{
+    free(mesh->points);
+    free(mesh->p0); free(mesh->p1); free(mesh->p2);
+    free(mesh);
+}
+
 /* The function which just frees all the buffers allocated in rtFaces and the structure itself */
 void rtFreeFaces(struct rtFaces *faces)
 {
     free(faces->p); free(faces->e1); free(faces->e2);
     free(faces->n); free(faces->un);
     free(faces);
+}
+
+/* Free all the contents of rtLights and the object itself */ 
+void rtFreeLights(struct rtLights *lights)
+{
+    free(lights->p);
+    free(lights);
 }
 
 /* Returns index of the face appeared to be closest one to the point of view in the direction

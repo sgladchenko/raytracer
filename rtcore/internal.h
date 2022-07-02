@@ -14,20 +14,6 @@
 
 #include <stdlib.h>
 
-/* Allocate buffer of #(N) rtVector3D structs on heap; returns a pointer to it.
-   When using SIMD, makes necessary alignment. */
-inline struct rtVector3D *rtMakeVector3DArray(int N)
-{
-#ifndef RT_SIMD
-    // When we don't use SIMD, no need in special alignment; normal malloc
-    return (struct rtVector3D *)malloc(sizeof(struct rtVector3D)*N);
-#else
-    // When using SIMD, all the float buffers need to be aligned, so they can
-    // be loaded to vector registers. (RT_VNUM is the size of registers used)
-    return (struct rtVector3D *)aligned_alloc(sizeof(float)*RT_VNUM, sizeof(struct rtVector3D)*N);
-#endif
-}
-
 /* Fancy, or not that much fancy, macros */
 
 #define RT_SQR(x) (x)*(x)

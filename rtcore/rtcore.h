@@ -26,7 +26,7 @@ struct rtMesh
     // Number of points
     int Npoints;
     // Number of faces
-    int NFaces;
+    int Nfaces;
     // Points themselves
     struct rtVector3D *points;
     // Points of faces; e.g. p0[i] defines a base point of ith face
@@ -70,8 +70,15 @@ struct rtLights
 /* Core functions needed for raytracing */
 //////////////////////////////////////////
 
-struct rtFaces *rtMakeFaces(struct rtMesh *mesh);
+struct rtVector3D *rtMakeVector3DArray(int N);
+
+struct rtMesh   *rtMakeMesh(int Npoints, int Nfaces);
+struct rtFaces  *rtMakeFaces(struct rtMesh *mesh);
+struct rtLights *rtMakeLights(int Nlights);
+
+void rtFreeMesh(struct rtMesh *mesh);
 void rtFreeFaces(struct rtFaces *faces);
+void rtFreeLights(struct rtLights *lights);
 
 int rtIntersect(struct rtFaces *faces, struct rtView *view, struct rtVector3D *intersection);
 int rtIsExposed(struct rtFaces *faces,

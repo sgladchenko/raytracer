@@ -19,7 +19,7 @@ namespace rt
     /* Very simple class that wraps things around colors and operations with them */
     struct RGB
     {
-        typedef int color_t;
+        typedef int color_t;        
         // Default color is black
         RGB()
             : red {0}, green {0}, blue {0}
@@ -78,6 +78,7 @@ namespace rt
     public:
         // Take a mesh from <filename> saved as JSON
         Render(std::string fname, int _Nx, int _Ny);
+        virtual ~Render();
 
         // Set the point and the direction of viewing
         void setView(rtVector3D direction,
@@ -91,12 +92,18 @@ namespace rt
         // Dimensions of the frame
         int Nx, Ny;
         // Cache the rendered pixmap
-        rt::Pixmap cache;
+        bool pixmapReady = false;
+        rt::Pixmap pixmapCache;
 
         // Hidden C-language structures that are used in rtcore.h
         rtMesh* mesh;
         rtFaces* faces;
         rtLights* lights;
+
+        // Base colors of faces, colors of lights and color of the ambient light
+        rt::RGB* facecolors;
+        rt::RGB* lightcolors;
+        rt::RGB ambientcolor;
 
         // Function that makes a structure of rtView, taking the
         // coordinates in pixels within a frame

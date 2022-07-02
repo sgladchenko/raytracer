@@ -1,7 +1,7 @@
  CC = gcc
  CXX = g++
  BUILD = build
- INCLUDE = -I rtcore/ -I render/
+ INCLUDE = -I rtcore/ -I render/ -I lib/
  
 ######################
 # Main build targets #
@@ -56,3 +56,19 @@ $(BUILD)/pixmap_save_test: render/render.hpp \
 		   test/pixmap_save_test.cpp \
 		   -L ./lib/libpng/lib -lpng16 -lz  \
 		   -o $(BUILD)/pixmap_save_test
+
+.PHONY: $(BUILD)/render_test
+$(BUILD)/render_test: render/render.hpp \
+					  render/render.cpp \
+					  render/pixmap.cpp \
+					  render/rgb.cpp \
+					  $(BUILD)/rtcore.o \
+					  test/render_test.cpp
+	$(CXX) $(INCLUDE) -I lib/libpng/include \
+		   render/render.cpp \
+		   render/pixmap.cpp \
+		   render/rgb.cpp \
+		   test/render_test.cpp \
+		   $(BUILD)/rtcore.o \
+		   -L ./lib/libpng/lib -lpng16 -lz  \
+		   -o $(BUILD)/render_test
