@@ -32,43 +32,18 @@ clean:
 # Some smaller files for testing #
 ##################################
 
-.PHONY: test
-test: $(BUILD) $(BUILD)/test $(BUILD)/cpptest $(BUILD)/pngtest
-
-$(BUILD)/test: $(BUILD) test/test.c rtcore/internal.h
-	$(CC) $(INCLUDE) test/test.c -o $(BUILD)/test
-
-$(BUILD)/cpptest: $(BUILD) test/cpptest.cpp rtcore/internal.h
-	$(CXX) $(INCLUDE) test/cpptest.cpp -o $(BUILD)/cpptest
-
-.PHONY: $(BUILD)/pngtest
-$(BUILD)/pngtest: test/pngtest.c
-	$(CC) -I lib/libpng/include test/pngtest.c -L ./lib/libpng/lib -lpng16 -o $(BUILD)/pngtest
-
-.PHONY: $(BUILD)/pixmap_save_test
-$(BUILD)/pixmap_save_test: render/render.hpp \
-						   render/pixmap.cpp \
-						   render/rgb.cpp \
-						   test/pixmap_save_test.cpp
-	$(CXX) $(INCLUDE) -I lib/libpng/include \
-		   render/pixmap.cpp \
-		   render/rgb.cpp \
-		   test/pixmap_save_test.cpp \
-		   -L ./lib/libpng/lib -lpng16 -lz  \
-		   -o $(BUILD)/pixmap_save_test
-
 .PHONY: $(BUILD)/render_test
-$(BUILD)/render_test: render/render.hpp \
+$(BUILD)/test_sample: render/render.hpp \
 					  render/render.cpp \
 					  render/pixmap.cpp \
 					  render/rgb.cpp \
 					  $(BUILD)/rtcore.o \
-					  test/render_test.cpp
+					  test/test_sample.cpp
 	$(CXX) $(INCLUDE) -I lib/libpng/include \
 		   render/render.cpp \
 		   render/pixmap.cpp \
 		   render/rgb.cpp \
-		   test/render_test.cpp \
+		   test/test_sample.cpp \
 		   $(BUILD)/rtcore.o \
 		   -L ./lib/libpng/lib -lpng16 -lz  \
-		   -o $(BUILD)/render_test
+		   -o $(BUILD)/test_sample
