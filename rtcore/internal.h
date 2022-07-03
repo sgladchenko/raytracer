@@ -18,9 +18,9 @@
 
 #define RT_SQR(x) (x)*(x)
 // Dirty macro for dot products
-#define RT_DOT(v,w) (v.x * w.x + v.y * w.y + v.z * w.z)
+#define RT_DOT(v,w) ((v).x*(w).x + (v).y*(w).y + (v).z*(w).z)
 // Local version of zero float
-#define RT_EPS 1.0e-7f
+#define RT_EPS 1.192093e-07
 // Macro that makes comparison that a given float is close to zero
 #define RT_ISZERO(x) ((x > -RT_EPS) && (x < RT_EPS))
 // Macro to quickly check the range

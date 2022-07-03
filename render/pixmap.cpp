@@ -31,7 +31,7 @@ void rt::Pixmap::savepng(std::string fname) const
     png_set_IHDR(
         png,
         info,
-        Ny, Nx,
+        Nx, Ny,
         8,
         PNG_COLOR_TYPE_RGBA,
         PNG_INTERLACE_NONE,
@@ -40,23 +40,23 @@ void rt::Pixmap::savepng(std::string fname) const
     );
     png_write_info(png, info);
 
-    png_bytep* row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Nx);
-    for (int i = 0; i < Nx; ++i)
+    png_bytep* row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Ny);
+    for (int j = 0; j < Ny; ++j)
     {
-        row_pointers[i] = (png_bytep) malloc(sizeof(png_byte) * Ny * 4);
-        for (int j = 0; j < Ny; ++j)
+        row_pointers[j] = (png_bytep) malloc(sizeof(png_byte) * Nx * 4);
+        for (int i = 0; i < Nx; ++i)
         {
-            row_pointers[i][4*j + 0] = pixel(i,j).red;
-            row_pointers[i][4*j + 1] = pixel(i,j).green;
-            row_pointers[i][4*j + 2] = pixel(i,j).blue;
-            row_pointers[i][4*j + 3] = 0xff; // A channel is always 255, it isn't used
+            row_pointers[j][4*i + 0] = static_cast<unsigned char>(pixel(i,j).red);
+            row_pointers[j][4*i + 1] = static_cast<unsigned char>(pixel(i,j).green);
+            row_pointers[j][4*i + 2] = static_cast<unsigned char>(pixel(i,j).blue);
+            row_pointers[j][4*i + 3] = 0xff; // A channel is always 255, it isn't used
         }
     }
 
     png_write_image(png, row_pointers);
     png_write_end(png, NULL);
 
-    for (int i = 0; i < Nx; ++i) { free(row_pointers[i]); }
+    for (int j = 0; j < Ny; ++j) { free(row_pointers[j]); }
     free(row_pointers);
 
     fclose(fp);

@@ -28,9 +28,9 @@ struct rtMesh  *rtMakeMesh(int Npoints, int Nfaces)
     // Here: no need in alignment, as this buffer isn't going to be used
     // in the actual raytracing
     mesh->points = (struct rtVector3D *)malloc(sizeof(struct rtVector3D) * Npoints);
-    mesh->p0 = (int *)malloc(sizeof(int) * Npoints);
-    mesh->p1 = (int *)malloc(sizeof(int) * Npoints);
-    mesh->p2 = (int *)malloc(sizeof(int) * Npoints);
+    mesh->p0 = (int *)malloc(sizeof(int) * Nfaces);
+    mesh->p1 = (int *)malloc(sizeof(int) * Nfaces);
+    mesh->p2 = (int *)malloc(sizeof(int) * Nfaces);
 
     return mesh;
 }
@@ -50,12 +50,13 @@ struct rtFaces *rtMakeFaces(struct rtMesh *mesh)
     faces->n  = rtMakeVector3DArray(faces->N);
     faces->un = rtMakeVector3DArray(faces->N);
 
-    // Just make a copy of base points in rtFaces
-    memcpy(faces->p, mesh->p0, sizeof(struct rtVector3D)*faces->N);
-
     // Side edges of faces; e1 = p1 - p0 and e2 = p2 - p0
     for (int i = 0; i < mesh->Nfaces; ++i)
     {
+        faces->p[i].x = mesh->points[mesh->p0[i]].x;
+        faces->p[i].y = mesh->points[mesh->p0[i]].y;
+        faces->p[i].z = mesh->points[mesh->p0[i]].z;
+
         faces->e1[i].x = mesh->points[mesh->p1[i]].x - mesh->points[mesh->p0[i]].x;
         faces->e1[i].y = mesh->points[mesh->p1[i]].y - mesh->points[mesh->p0[i]].y;
         faces->e1[i].z = mesh->points[mesh->p1[i]].z - mesh->points[mesh->p0[i]].z;
@@ -121,9 +122,8 @@ int rtIntersect(struct rtFaces *faces, struct rtView *view, struct rtVector3D *i
 {
 #ifndef RT_SIMD
    // Provide some invalid values, just to avoid any uninitialized reads
-   float tcur, tmin, ucur, umin, vcur, vmin;
-   tcur = tmin = INFINITY;
-   ucur = umin = vcur = vmin = -1.0f;
+   float tcur, tmin;
+   tcur = tmin = __FLT_MAX__;
    int imin = -1; // Will be returned if no intersections found
 
    for (int i = 0; i < faces->N; ++i)
@@ -142,7 +142,7 @@ int rtIntersect(struct rtFaces *faces, struct rtView *view, struct rtVector3D *i
       // check that it's in the right direction
       tcur = RT_DOT(b0,faces->n[i]) / rn;
 
-      if ((tcur > 0.0f) && tcur < tmin)
+      if ((tcur > 0.0f) && (tcur < tmin))
       {
          // If it's closer, than understand if the ray actually intersects the plane
          // within the face
@@ -151,34 +151,36 @@ int rtIntersect(struct rtFaces *faces, struct rtView *view, struct rtVector3D *i
                                  .y = faces->e1[i].z * b0.x - faces->e1[i].x * b0.z,
                                  .z = faces->e1[i].x * b0.y - faces->e1[i].y * b0.x};
 
-         struct rtVector3D b2 = {.x = faces->e2[i].y * b0.z - faces->e1[i].z * b0.y,
-                                 .y = faces->e2[i].z * b0.x - faces->e1[i].x * b0.z,
-                                 .z = faces->e2[i].x * b0.y - faces->e1[i].y * b0.x};
+         struct rtVector3D b2 = {.x = faces->e2[i].y * b0.z - faces->e2[i].z * b0.y,
+                                 .y = faces->e2[i].z * b0.x - faces->e2[i].x * b0.z,
+                                 .z = faces->e2[i].x * b0.y - faces->e2[i].y * b0.x};
 
          float ucur = RT_DOT(view->r,b2) / rn;
-         float vcur = RT_DOT(view->r,b1) / rn;
+         float vcur = (-1.0f)*RT_DOT(view->r,b1) / rn;
 
-         if (RT_INRANGE(0.0f,ucur,1.0f) && RT_INRANGE(0.0f,vcur,1.0f) && RT_INRANGE(0.0f,ucur+vcur,1.0f))
+         if (RT_INRANGE(0.0f,ucur,1.0f) && RT_INRANGE(0.0f,vcur,1.0f) && RT_INRANGE(0.0f,(ucur+vcur),1.0f))
          {
             // Ray intersects the face; save new values
-            umin = ucur; vmin = vcur;
             tmin = tcur;
             imin = i;
          }
       }
    }
 
-   // Return the point of intersection through the pointer given in args
-   intersection->x = view->p.x + view->r.x*tmin;
-   intersection->y = view->p.y + view->r.y*tmin;
-   intersection->z = view->p.z + view->r.z*tmin;
+   if (imin > 0)
+   {
+      // Return the point of intersection through the pointer given in args
+      intersection->x = view->p.x + (view->r.x)*tmin;
+      intersection->y = view->p.y + (view->r.y)*tmin;
+      intersection->z = view->p.z + (view->r.z)*tmin;
+   }
    
    return imin;
 #endif
 }
 
 /* Similar function to the one above, but it finds if there's an obstacle between
-   intersection point and the light source; if there is, it will make a shadow,
+   intersection point and the light source; if there is, there'll be a shadow,
    and the light source won't contribute to the final color. Returns 0 if the point
    isn't exposed by the light of the light source, returns 1 otherwise. Also in 
    cosine returns cosine of the angle between the normal and the line connecting
@@ -219,26 +221,29 @@ int rtIsExposed(struct rtFaces *faces,
       // The face itself can't be an obstacle to the light sources
       float b0n = RT_DOT(b0,faces->n[i]);
       if (RT_ISZERO(b0n)) { continue; }
+      //if (i == iface) { continue; }
 
       float t = b0n / rn;
 
       // Obstacle is something between the face (that's currently being checked for being exposed)
       // and the light source
-      if (RT_INRANGE(0.0f,t,1.0f))
+      if (RT_INRANGE(RT_EPS,t,1.0f))
+      // Note: here the left bound is RT_EPS, as nearest faces can make a fake shadow
+      // so when the distance is too short, we need to discard it
       {
          struct rtVector3D b1 = {.x = faces->e1[i].y * b0.z - faces->e1[i].z * b0.y,
                                  .y = faces->e1[i].z * b0.x - faces->e1[i].x * b0.z,
                                  .z = faces->e1[i].x * b0.y - faces->e1[i].y * b0.x};
 
-         struct rtVector3D b2 = {.x = faces->e2[i].y * b0.z - faces->e1[i].z * b0.y,
-                                 .y = faces->e2[i].z * b0.x - faces->e1[i].x * b0.z,
-                                 .z = faces->e2[i].x * b0.y - faces->e1[i].y * b0.x};
+         struct rtVector3D b2 = {.x = faces->e2[i].y * b0.z - faces->e2[i].z * b0.y,
+                                 .y = faces->e2[i].z * b0.x - faces->e2[i].x * b0.z,
+                                 .z = faces->e2[i].x * b0.y - faces->e2[i].y * b0.x};
 
          // Now we can evaluate the baricentric coordinates of the intersection with the plane of current face
          float u = RT_DOT(ray,b2) / rn;
-         float v = RT_DOT(ray,b1) / rn;
+         float v = (-1.0f)*RT_DOT(ray,b1) / rn;
 
-         if (RT_INRANGE(0.0f,u,1.0f) && RT_INRANGE(0.0f,v,1.0f) && RT_INRANGE(0.0f,u+v,1.0f))
+         if (RT_INRANGE(0.0,u,1.0f) && RT_INRANGE(0.0,v,1.0f) && RT_INRANGE(0.0,(u+v),1.0f))
          {
             // ray intersects this face, so this face is an obstacle for the light beams exposing the
             // original intersection point (provided in args).

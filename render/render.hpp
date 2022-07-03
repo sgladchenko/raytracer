@@ -19,10 +19,11 @@ namespace rt
     /* Very simple class that wraps things around colors and operations with them */
     struct RGB
     {
-        typedef int color_t;        
+        typedef float color_t;
+
         // Default color is black
         RGB()
-            : red {0}, green {0}, blue {0}
+            : red {0.0f}, green {0.0f}, blue {0.0f}
         {}
 
         RGB(color_t r, color_t g, color_t b)
@@ -37,6 +38,8 @@ namespace rt
         rt::RGB& operator+=(const rt::RGB& color);
         rt::RGB operator*(const rt::RGB& color);
         rt::RGB operator*(float factor);
+
+        std::string toStr() const;
 
         color_t red, green, blue;
     };
@@ -57,11 +60,11 @@ namespace rt
         enum class format { png };
         void saveFile(std::string fname, rt::Pixmap::format fmt) const;
 
-        rt::RGB& operator()(int i, int j) { return buffer[i*Nx + j]; }
-        rt::RGB& pixel(int i, int j) { return buffer[i*Nx + j]; }
+        rt::RGB& operator()(int i, int j) { return buffer[j*Nx + i]; }
+        rt::RGB& pixel(int i, int j) { return buffer[j*Nx + i]; }
 
-        const rt::RGB& operator()(int i, int j) const { return buffer[i*Nx + j]; }
-        const rt::RGB& pixel(int i, int j) const { return buffer[i*Nx + j]; }
+        const rt::RGB& operator()(int i, int j) const { return buffer[j*Nx + i]; }
+        const rt::RGB& pixel(int i, int j) const { return buffer[j*Nx + i]; }
 
     private:
         // Dimensions of the frame
@@ -76,17 +79,18 @@ namespace rt
     class Render
     {
     public:
-        // Take a mesh from <filename> saved as JSON
+        // Take information about the schene saved as JSON in <filename>
         Render(std::string fname, int _Nx, int _Ny);
         virtual ~Render();
 
-        // Set the point and the direction of viewing
-        void setView(rtVector3D direction,
-                     rtVector3D pointofview,
-                     float aperture);
+        // Set point and direction of viewing
+        void setPOV(rtVector3D _directionOfView, rtVector3D _pointOfView, float _aperture);
 
         // Returns a pixmap of the rendered picture
         const rt::Pixmap& pixmap();
+
+        // Color of the background (when ray doesn't hit any faces)
+        const rt::RGB blankColor {"#FFFFFF"};
 
     private:
         // Dimensions of the frame
@@ -100,16 +104,28 @@ namespace rt
         rtFaces* faces;
         rtLights* lights;
 
-        // Base colors of faces, colors of lights and color of the ambient light
+        // Base colors of faces, colors of lights and the color of ambient light
         rt::RGB* facecolors;
         rt::RGB* lightcolors;
         rt::RGB ambientcolor;
 
-        // Function that makes a structure of rtView, taking the
-        // coordinates in pixels within a frame
-        rtView makeView(int i, int j);
+        // Point of view
+        rtVector3D directionOfView;
+        rtVector3D pointOfView;
+        float aperture;
 
-        // Update the cached pixmap if needed
+        // Base vectors of the physical frame
+        rtVector3D frameE_x;
+        rtVector3D frameE_y;
+        // Scale factor between physical coordinates of the frame and
+        // coordinates in pixels
+        float frameScale;
+
+        // Function that makes a structure of rtView, taking
+        // coordinates (in pixels) of a point in the frame
+        void makertView(int i, int j, rtView* view);
+
+        // Update cached pixmap if needed
         void doRender();
     };
 }
