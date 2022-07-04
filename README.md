@@ -11,9 +11,10 @@ So far there's a scalar version entirely implemented. The core code which makes 
 
 ### JSON format for specifying shapes
 
-Currently this raytracing engine can load faces (triangular polygons) and configuration of lights from JSON files. An example file can be found at test/sample.json, and its rendered picture is test_sample.png (rendered by test/test_sample.cpp). *TODO: Write more about it*
+Currently this raytracing engine can load faces (triangular polygons) and configuration of lights from JSON files. An example file can be found at test/sample.json, and its rendered picture is test_sample.png (rendered by test/test_sample.cpp, also shown right about in this README). *TODO: Write more about it*
 
 ### Agenda:
 
 1. Figure out with profilers most time-consuming parts of the code and the ways how they may be optimized with vector intrinsics. However in the raytracing code there're too many places with boolean checks involved, what makes efficient usage of vector intrinsics hindered and doubtful.
 2. Make the code multithreaded; presumably the easiest part of this work, as STL provides most straightforward interface for running threads (the main reason why "frontend" part of this engine is implemented with C++; otherwise I would have had to use pthreads directly, what's much uglier.)
+3. Make a build of this engine as a shared library with a header file provided, to use this as an external library in other code projects.
