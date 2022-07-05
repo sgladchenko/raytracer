@@ -11,7 +11,7 @@ So far there's a scalar version entirely implemented. The core code which makes 
 
 ### JSON format for specifying shapes
 
-Currently this raytracing engine can load faces (triangular polygons) and configuration of lights from JSON files. An example file can be found at test/sample.json, and its rendered picture is test_sample.png (rendered by test/test_sample.cpp, also shown right about in this README). *TODO: Write more about it*
+Currently this raytracing engine can load faces (triangular polygons) and configuration of lights from JSON files. An example file can be found at test/sample.json, and its rendered picture is test_sample.png (shown above in this README, rendered by test/test_sample.cpp). *TODO: Write more about it*
 
 ### Agenda:
 
